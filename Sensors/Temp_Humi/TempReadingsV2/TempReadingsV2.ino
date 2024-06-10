@@ -37,8 +37,7 @@ bool checkTemp(int setPoint, float Diff) {
     return fanState = true;
   }
 }
-
-
+// Functions for calculating values
 float saturationPressure(float t_d_c) {
   // Taking celsius temp and getting Saturation Pressure
   return 6.112 * exp((17.67 * t_d_c) / (t_d_c + 243.5));
