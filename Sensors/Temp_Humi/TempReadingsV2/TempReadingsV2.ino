@@ -15,7 +15,7 @@ int MOTORPIN = 10;
 // Fanstate Boolean Value for Temp check
 bool fanState = false;
 
-// Temp check function to operate on fanstate
+// Temp check function to operate on fanState
 bool checkTemp(int setPoint, float Diff) {
   // Set Point Potentiometer mapping and reading
   int setpoint = analogRead(POTPIN);
