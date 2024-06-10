@@ -12,10 +12,31 @@ LiquidCrystal lcd(12, 11, 5, 4, 3, 2); // RS, E, D4, D5, D6, D7
 // DC Motor Pins
 int MOTORPIN = 10;
 
+// Fanstate Boolean Value for Temp check
+bool fanState = false;
 
+// Temp check function to operate on fanstate
+bool checkTemp(int setPoint, float Diff) {
+  // Set Point Potentiometer mapping and reading
+  int setpoint = analogRead(POTPIN);
+  setpoint = map(setpoint, 0, 1023, 78, 85);
+  float deadband = 1;
+  float diff = setpoint - deadband;
 
-// Direction state boolean value
-bool fanState;
+  // Get Temp
+  // Check sensor then convert to F Degrees
+  int chk = DHT.read11(DHT11_PIN);
+  float t_d_C = DHT.temperature;
+  float t_d_F = (DHT.temperature * 1.8) + 32;
+  float humidity = DHT.humidity;
+
+  if (t_d_F < diff) {
+    return fanState = false;
+  } 
+  else if (t_d_F > diff) {
+    return fanState = true;
+  }
+}
 
 
 float saturationPressure(float t_d_c) {
@@ -39,6 +60,8 @@ void setup(){
   pinMode(MOTORPIN, OUTPUT);
 }
 
+
+// Loop Start
 void loop(){
   // Check sensor then convert to F Degrees
   int chk = DHT.read11(DHT11_PIN);
@@ -72,7 +95,7 @@ void loop(){
 
   // Set Point Potentiometer mapping and reading
   int setpoint = analogRead(POTPIN);
-  setpoint = map(setpoint, 0, 1023, 70, 76);
+  setpoint = map(setpoint, 0, 1023, 75, 80);
   float deadband = 2;
   float diff = setpoint - deadband;
 
@@ -92,27 +115,16 @@ void loop(){
     lcd.print("Off");
   }
 
-  // Fan Test
-  while (t_d_F < diff) {
-    analogWrite(MOTORPIN, 0);
-  } 
-  
-  while (t_d_F > diff) {
-    analogWrite(MOTORPIN, 255);
-  }
-
   // Clear screen after 2 second delay
   delay(2000);
   lcd.clear();
 
   // Getting Sat Pressure
   float s_P = saturationPressure(t_d_C);
-
   // Getting Actual Vapor Pressure Value
   float v_P = actualVaporPressure(t_d_F, humidity);
   
-  // Set new LCF Position
-
+  // Set new Cursor Position
   lcd.setCursor(0, 0);
 
   // Measured in inch of Mercury
@@ -120,7 +132,7 @@ void loop(){
   lcd.print(s_P);
   lcd.print("mb");
   
-  // Set new LCF Position
+  // Set new Cursor Position
   lcd.setCursor(0,1);
   
   // Measured in inch of Mercury
@@ -141,5 +153,12 @@ void loop(){
   // Clear screen after 2 second delay
   delay(2000);
   lcd.clear();
+
+
+  if (checkTemp(setpoint, diff) == false) {
+    analogWrite(MOTORPIN, 0);
+  } else if (checkTemp(setpoint, diff) == true) {
+    analogWrite(MOTORPIN, 255);
+   }
 
 }
