@@ -6,11 +6,10 @@ LiquidCrystal lcd(12, 11, 5, 4, 3, 2); // RS, E, D4, D5, D6, D7
 #define DHT11_PIN 7
 // Potentiometer Pin
 #define POTPIN 0
-// DC Motor Pins
-int MOTORPIN = 10;
 // Button pin
 int BUTTONPIN = 8;
-
+// Button State
+int buttonState = 0;
 
 // Functions for calculating values
 float saturationPressure(float t_d_c) {
@@ -64,9 +63,9 @@ void checkSetPoint() {
   lcd.print(diff);
 
 }
+
 void setup() {
   // put your setup code here, to run once:
-  pinMode(MOTORPIN, OUTPUT);
   pinMode(BUTTONPIN, INPUT);
   Serial.begin(9600);
   lcd.begin(16, 2);
@@ -79,19 +78,18 @@ void loop() {
   float TDF = (DHT.temperature * 1.8) + 32;
   float HUM = DHT.humidity;
 
-  // SetPoints
-  // Set Point Potentiometer mapping and reading
+  // Button State Read
+  buttonState = digitalRead(BUTTONPIN);
 
-
-  checkTempF(TDF);
-  checkTempC(TDC);
-
-  delay(5000);
-  lcd.clear();
-
-  checkHum(HUM);
-  checkSetPoint();
-  delay(5000);
-  lcd.clear();
+  if (buttonState == LOW) {
+    lcd.clear();
+    checkTempF(TDF);
+    checkTempC(TDC);
+  } else if (buttonState == HIGH) {
+    lcd.clear();
+    checkHum(HUM);
+    checkSetPoint();
+  }
+  delay(1000);
 
 }
