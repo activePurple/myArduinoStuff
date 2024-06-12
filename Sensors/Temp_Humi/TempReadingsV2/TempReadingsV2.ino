@@ -15,6 +15,7 @@ int MOTORPIN = 10;
 // Fanstate Boolean Value for Temp check
 bool fanState = false;
 
+
 // Temp check function to operate on fanState
 bool checkTemp(int setPoint, float Diff) {
   // Set Point Potentiometer mapping and reading
@@ -36,7 +37,9 @@ bool checkTemp(int setPoint, float Diff) {
   else if (t_d_F > diff) {
     return fanState = true;
   }
+  return fanState;
 }
+
 // Functions for calculating values
 float saturationPressure(float t_d_c) {
   // Taking celsius temp and getting Saturation Pressure
@@ -51,17 +54,17 @@ float dewPointApproximation(float t_d_f, float rh) {
   return t_d_f - ((100 - rh) / 5.0);
 }
 
+
+// Code Set-Up
 void setup(){
+  pinMode(MOTORPIN, OUTPUT);
   Serial.begin(9600);
   lcd.begin(16, 2);
-
-  // DC Motor Pins
-  pinMode(MOTORPIN, OUTPUT);
 }
-
 
 // Loop Start
 void loop(){
+
   // Check sensor then convert to F Degrees
   int chk = DHT.read11(DHT11_PIN);
   float t_d_C = DHT.temperature;
@@ -94,7 +97,7 @@ void loop(){
 
   // Set Point Potentiometer mapping and reading
   int setpoint = analogRead(POTPIN);
-  setpoint = map(setpoint, 0, 1023, 75, 80);
+  setpoint = map(setpoint, 0, 1023, 70, 80);
   float deadband = 2;
   float diff = setpoint - deadband;
 
@@ -109,8 +112,9 @@ void loop(){
   // Reading too hot if above and off if below
   lcd.setCursor(0,1);
   if (t_d_F > diff) {
-  lcd.print("Too Hot");
-  } else {
+  lcd.print("Too Hot! Fan On!");
+  } 
+  else if (t_d_F < diff) {
     lcd.print("Off");
   }
 
